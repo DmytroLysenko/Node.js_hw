@@ -1,0 +1,27 @@
+{
+  "name": "01_node_hw",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/DmytroLysenko/Node.js_hw.git"
+  },
+  "author": "DmytroLysenko <kyxap.ua@gmail.com>",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/DmytroLysenko/Node.js_hw/issues"
+  },
+  "homepage": "https://github.com/DmytroLysenko/Node.js_hw#readme",
+  "devDependencies": {
+    "nodemon": "^2.0.6"
+  },
+  "dependencies": {
+    "shortid": "^2.2.16",
+    "yargs": "^16.2.0"
+  }
+}
