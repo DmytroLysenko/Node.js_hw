@@ -1,5 +1,5 @@
 const path = require("path");
-const fs = require("fs").promises;
+const fsPromises = require("fs").promises;
 
 const contactsPath = path.resolve("./db/contacts.json");
 
@@ -7,8 +7,15 @@ const contactsPath = path.resolve("./db/contacts.json");
  * @param {null} - not receive any params
  * @returns {promises} - list of contacts
  */
-function listContacts() {
-  return fs.readFile(contactsPath).then((data) => JSON.parse(data));
+async function listContacts() {
+  try {
+    const contacts = fsPromises
+      .readFile(contactsPath)
+      .then((data) => JSON.parse(data));
+    return contacts;
+  } catch (err) {
+    throw err;
+  }
 }
 
 /** Async get contact by id
@@ -18,7 +25,8 @@ function listContacts() {
 async function getContactById(contactId) {
   try {
     const contacts = await listContacts();
-    return contacts.find((contact) => contact.id === contactId);
+    const contact = contacts.find((contact) => contact.id === contactId);
+    return contact;
   } catch (err) {
     throw err;
   }
@@ -35,8 +43,9 @@ async function removeContact(contactId) {
 
     const status = contacts.length !== newContacts.length;
 
-    if (status) await fs.writeFile(contactsPath, JSON.stringify(newContacts));
-
+    if (status) {
+      await fsPromises.writeFile(contactsPath, JSON.stringify(newContacts));
+    }
     return status;
   } catch (err) {
     throw err;
@@ -57,13 +66,19 @@ async function addContact(name, email = null, phone = null) {
     });
 
     if (status) {
+      const makeId = () =>
+        Math.max(...contacts.map((contact) => contact.id)) + 1;
+
       const contact = {
-        id: Math.max(...contacts.map((contact) => contact.id)) + 1,
+        id: makeId(),
         name,
         email,
         phone,
       };
-      await fs.writeFile(contactsPath, JSON.stringify([...contacts, contact]));
+      await fsPromises.writeFile(
+        contactsPath,
+        JSON.stringify([...contacts, contact])
+      );
     }
     return status;
   } catch (err) {

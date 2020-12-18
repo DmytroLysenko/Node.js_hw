@@ -16,6 +16,10 @@ function invokeAction({ action, id, name, email, phone }) {
       break;
 
     case "get":
+      if (!id) {
+        console.warn("\x1B[31m id - required parameter!");
+        break;
+      }
       getContactById(id)
         .then((contact) =>
           console.log(contact ? contact : `Contact with id:${id} not found`)
@@ -38,6 +42,10 @@ function invokeAction({ action, id, name, email, phone }) {
       break;
 
     case "remove":
+      if (!id) {
+        console.warn("\x1B[31m id - required parameter!");
+        break;
+      }
       removeContact(id)
         .then((status) =>
           console.log(
