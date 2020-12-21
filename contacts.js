@@ -3,13 +3,12 @@ const fsPromises = require("fs").promises;
 
 const contactsPath = path.resolve("./db/contacts.json");
 
-/** Return list of contacts
- * @param {null} - not receive any params
- * @returns {promises} - list of contacts
+/** Get list of contacts
+ * @returns {array} - array of contacts
  */
 async function listContacts() {
   try {
-    const contacts = fsPromises
+    const contacts = await fsPromises
       .readFile(contactsPath)
       .then((data) => JSON.parse(data));
     return contacts;
@@ -18,9 +17,9 @@ async function listContacts() {
   }
 }
 
-/** Async get contact by id
- * @param {number} contactId
- * @returns {promises} contact
+/** Get contact by id
+ * @param {number} contactId - contact id
+ * @returns {object || undefined} - object: contact, undefined: not found
  */
 async function getContactById(contactId) {
   try {
@@ -32,55 +31,91 @@ async function getContactById(contactId) {
   }
 }
 
-/** Async remove contact
- * @param {number} contactId
- * @returns {boolean} status: true - success, false - failure
+/** Delete contact
+ * @param {number} contactId - contact id
+ * @returns {boolean} - true: removed successfully, false: not found
  */
 async function removeContact(contactId) {
   try {
     const contacts = await listContacts();
     const newContacts = contacts.filter((contact) => contact.id !== contactId);
 
-    const status = contacts.length !== newContacts.length;
+    const passed = contacts.length !== newContacts.length;
 
-    if (status) {
+    if (passed) {
       await fsPromises.writeFile(contactsPath, JSON.stringify(newContacts));
     }
-    return status;
+    return passed;
   } catch (err) {
     throw err;
   }
 }
 
-/** Async add contact
- * @param {string} name
- * @param {string} email
- * @param {string} phone
- * @returns {boolean} status: true - success, false - failure
+/** Add contact
+ * @param {object} contact - data of contact
+ * @param {string} contact.name - name of contact
+ * @param {string} contact.email - email of contact
+ * @param {string} contact.phone - phone of contact
+ * @returns {object || false} - added contact or false: contact is already present
  */
-async function addContact(name, email = null, phone = null) {
+async function addContact({ name, email, phone }) {
   try {
     const contacts = await listContacts();
-    const status = !contacts.some((contact) => {
+    const isPresent = contacts.some((contact) => {
       return contact.name === name;
     });
 
-    if (status) {
-      const makeId = () =>
-        Math.max(...contacts.map((contact) => contact.id)) + 1;
-
-      const contact = {
-        id: makeId(),
-        name,
-        email,
-        phone,
-      };
-      await fsPromises.writeFile(
-        contactsPath,
-        JSON.stringify([...contacts, contact])
-      );
+    if (isPresent) {
+      return false;
     }
-    return status;
+
+    const makeId = () => Math.max(...contacts.map((contact) => contact.id)) + 1;
+
+    const contact = {
+      id: makeId(),
+      name,
+      email,
+      phone,
+    };
+
+    await fsPromises.writeFile(
+      contactsPath,
+      JSON.stringify([...contacts, contact])
+    );
+
+    return contact;
+  } catch (err) {
+    throw err;
+  }
+}
+
+/** Edit contact
+ * @param {number} id - id of contact
+ * @param {object} contactData - data of contact
+ * @returns {object || undefined} - updated contact or undefined
+ */
+async function editContact(id, contactData) {
+  try {
+    const contacts = await listContacts();
+    const contact = contacts.find((contact) => contact.id === id);
+
+    if (!contact) return undefined;
+
+    const contactsUpdated = contacts.map((contact) => {
+      if (contact.id === id) {
+        return {
+          ...contact,
+          ...contactData,
+        };
+      }
+      return contact;
+    });
+
+    await fsPromises.writeFile(contactsPath, JSON.stringify(contactsUpdated));
+
+    const contactNew = contactsUpdated.find((contact) => contact.id === id);
+
+    return contactNew;
   } catch (err) {
     throw err;
   }
@@ -91,4 +126,5 @@ module.exports = {
   getContactById,
   removeContact,
   addContact,
+  editContact,
 };
