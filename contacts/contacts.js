@@ -1,7 +1,7 @@
 const path = require("path");
 const fsPromises = require("fs").promises;
 
-const contactsPath = path.resolve("./db/contacts.json");
+const contactsPath = path.resolve('./db/contacts.json');
 
 /** Get list of contacts
  * @returns {array} - array of contacts
@@ -18,13 +18,13 @@ async function listContacts() {
 }
 
 /** Get contact by id
- * @param {number} contactId - contact id
+ * @param {number} id - contact id
  * @returns {object || undefined} - object: contact, undefined: not found
  */
-async function getContactById(contactId) {
+async function getContactById(id) {
   try {
     const contacts = await listContacts();
-    const contact = contacts.find((contact) => contact.id === contactId);
+    const contact = contacts.find((contact) => contact.id === id);
     return contact;
   } catch (err) {
     throw err;
@@ -32,13 +32,13 @@ async function getContactById(contactId) {
 }
 
 /** Delete contact
- * @param {number} contactId - contact id
+ * @param {number} id - contact id
  * @returns {boolean} - true: removed successfully, false: not found
  */
-async function removeContact(contactId) {
+async function removeContact(id) {
   try {
     const contacts = await listContacts();
-    const newContacts = contacts.filter((contact) => contact.id !== contactId);
+    const newContacts = contacts.filter((contact) => contact.id !== id);
 
     const passed = contacts.length !== newContacts.length;
 
