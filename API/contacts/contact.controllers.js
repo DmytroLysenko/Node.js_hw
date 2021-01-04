@@ -1,6 +1,7 @@
 const contactModel = require("./contact.model");
 const { isValidObjectId } = require("mongoose");
 const Joi = require("joi");
+const { BadRequest } = require("../helpers/error.constructors");
 
 const createContact = async (req, res, next) => {
   try {
@@ -8,7 +9,7 @@ const createContact = async (req, res, next) => {
     const contact = await contactModel.create(contactData);
     res.status(201).json(contact);
   } catch (err) {
-    next(err);
+    next(new BadRequest(err.message));
   }
 };
 
@@ -23,15 +24,17 @@ const updateContact = async (req, res, next) => {
       },
       { new: true }
     );
-    res.status(200).json(contact);
+    contact
+      ? res.status(200).json(contact)
+      : res.status(404).send(`No contact with ID: ${id}`);
   } catch (err) {
-    next(err);
+    next(new BadRequest(err.message));
   }
 };
 
 const getContacts = async (req, res, next) => {
   try {
-    const contacts = await contactModel.find({});
+    const contacts = await contactModel.find();
     res.status(200).json(contacts);
   } catch (err) {
     next(err);
@@ -65,8 +68,7 @@ const deleteContact = async (req, res, next) => {
 const validateID = (req, res, next) => {
   const id = req.params.id;
   if (!isValidObjectId(id)) {
-    res.status(400).send("Invalid ID value");
-    return;
+    throw new BadRequest("Invalid ID value");
   }
   next();
 };
@@ -80,14 +82,16 @@ const contactValidationSchema = () => {
   const phone = Joi.string().pattern(
     /^[+]*[(]{0,1}[0-9]{1,4}[)]{0,1}[-\s\./0-9]*$/
   );
-  const subscription = Joi.string();
+  const subscription = Joi.string().valid("free", "pro", "premium");
   const password = Joi.string();
+  const token = Joi.string().token();
   return {
     name,
     email,
     phone,
     subscription,
     password,
+    token,
   };
 };
 
@@ -98,6 +102,7 @@ const validateCreateContact = (req, res, next) => {
     phone,
     subscription,
     password,
+    token,
   } = contactValidationSchema();
   const schema = Joi.object({
     name: name.required(),
@@ -105,12 +110,13 @@ const validateCreateContact = (req, res, next) => {
     phone,
     subscription,
     password: password.required(),
+    token,
   });
 
   const validationResult = schema.validate(req.body, { abortEarly: false });
 
   if (validationResult.error) {
-    return res.status(400).send({ message: validationResult.error.message });
+    throw new BadRequest(validationResult.error.message);
   }
 
   next();
@@ -125,7 +131,7 @@ const validateUpdateContact = (req, res, next) => {
   const validationResult = schema.validate(req.body, { abortEarly: false });
 
   if (validationResult.error) {
-    return res.status(400).send({ message: validationResult.error.message });
+    throw new BadRequest(validationResult.error.message);
   }
 
   next();
