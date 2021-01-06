@@ -9,7 +9,11 @@ const createContact = async (req, res, next) => {
     const contact = await contactModel.create(contactData);
     res.status(201).json(contact);
   } catch (err) {
-    next(new BadRequest(err.message));
+    const code = err.code;
+    if (code === 11000 || code === 11001) {
+      next(new BadRequest(err.message));
+    }
+    next(err);
   }
 };
 
@@ -28,7 +32,11 @@ const updateContact = async (req, res, next) => {
       ? res.status(200).json(contact)
       : res.status(404).send(`No contact with ID: ${id}`);
   } catch (err) {
-    next(new BadRequest(err.message));
+    const code = err.code;
+    if (code === 11000 || code === 11001) {
+      next(new BadRequest(err.message));
+    }
+    next(err);
   }
 };
 
