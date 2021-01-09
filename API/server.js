@@ -8,6 +8,8 @@ const PORT = process.env.PORT;
 const DATABASE_URL = process.env.DATABASE_URL;
 
 const contactsRouter = require("./contacts/contact.router");
+const userRouter = require("./users/user.router");
+const authRouter = require("./users/auth/auth.router");
 
 class Server {
   /**
@@ -41,6 +43,8 @@ class Server {
 
   initRoutes() {
     this.app.use("/api/contacts", contactsRouter);
+    this.app.use("/auth", authRouter);
+    this.app.use("/users", userRouter);
   }
 
   async connectToDB() {
@@ -49,6 +53,7 @@ class Server {
         useNewUrlParser: true,
         useUnifiedTopology: true,
         useCreateIndex: true,
+        useFindAndModify: true,
       });
 
       console.log("Database connection successful");
@@ -61,7 +66,7 @@ class Server {
 
   startListening() {
     this.app.listen(this.port, () =>
-      console.log(`\x1B[34m Listening on port: ${this.port}`)
+      console.log(`Listening on port: ${this.port}`)
     );
   }
 }
