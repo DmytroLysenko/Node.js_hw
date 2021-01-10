@@ -92,7 +92,7 @@ const contactValidationSchema = () => {
   );
   const subscription = Joi.string().valid("free", "pro", "premium");
   const password = Joi.string();
-  const token = Joi.string().token();
+  const token = Joi.string();
   return {
     name,
     email,
