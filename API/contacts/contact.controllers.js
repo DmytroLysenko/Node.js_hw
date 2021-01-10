@@ -42,8 +42,22 @@ const updateContact = async (req, res, next) => {
 
 const getContacts = async (req, res, next) => {
   try {
-    const contacts = await contactModel.find();
-    res.status(200).json(contacts);
+    if (Object.keys(req.query).length === 0) {
+      const contacts = await contactModel.find();
+      return res.status(200).json(contacts);
+    }
+
+    const { sub } = req.query;
+
+    const query = sub ? { subscription: sub } : {};
+
+    const options = {
+      // select: ["name", "email", "phone", "subscription"],
+      ...req.query,
+    };
+
+    const result = await contactModel.paginate(query, options);
+    res.status(200).json(result);
   } catch (err) {
     next(err);
   }

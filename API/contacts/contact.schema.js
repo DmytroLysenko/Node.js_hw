@@ -1,4 +1,5 @@
 const { Schema } = require("mongoose");
+const mongoosePaginate = require("mongoose-paginate-v2");
 
 module.exports = new Schema({
   name: {
@@ -29,7 +30,7 @@ module.exports = new Schema({
     type: String,
     default: "",
   },
-});
+}).plugin(mongoosePaginate);
 
 function validateEmail(email) {
   const isValid = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/.test(

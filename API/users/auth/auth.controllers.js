@@ -7,6 +7,7 @@ const {
   NotAuthorized,
   LoginOccupied,
 } = require("../../helpers/error.constructors");
+require("dotenv").config();
 const JWT_SECRET = process.env.JWT_SECRET;
 const costFactor = Number(process.env.BCRYPT_COST_FACTOR);
 

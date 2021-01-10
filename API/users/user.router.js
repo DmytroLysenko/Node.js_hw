@@ -10,4 +10,11 @@ userRouter.get(
   userControllers.currentUser
 );
 
+userRouter.patch(
+  "/",
+  authControllers.isAuthorized,
+  userControllers.validateUpdateUser,
+  userControllers.updateUser
+);
+
 module.exports = userRouter;
