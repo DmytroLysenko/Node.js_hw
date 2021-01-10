@@ -2,10 +2,6 @@ const express = require("express");
 const morgan = require("morgan");
 const cors = require("cors");
 const mongoose = require("mongoose");
-require("dotenv").config();
-
-const PORT = process.env.PORT;
-const DATABASE_URL = process.env.DATABASE_URL;
 
 const contactsRouter = require("./contacts/contact.router");
 const userRouter = require("./users/user.router");
@@ -71,4 +67,4 @@ class Server {
   }
 }
 
-module.exports = new Server(PORT, DATABASE_URL);
+module.exports = Server;
