@@ -5,7 +5,7 @@ const mongoose = require("mongoose");
 
 const contactsRouter = require("./contacts/contact.router");
 const userRouter = require("./users/user.router");
-const authRouter = require("./users/auth/auth.router");
+const authRouter = require("./auth/auth.router");
 
 class Server {
   /**
@@ -39,17 +39,17 @@ class Server {
 
   initRoutes() {
     this.app.use("/api/contacts", contactsRouter);
-    this.app.use("/auth", authRouter);
-    this.app.use("/users", userRouter);
+    this.app.use("/api/auth", authRouter);
+    this.app.use("/api/users", userRouter);
   }
 
   async connectToDB() {
     try {
       await mongoose.connect(this.dataBaseUrl, {
         useNewUrlParser: true,
-        useUnifiedTopology: true,
+        useFindAndModify: false,
         useCreateIndex: true,
-        useFindAndModify: true,
+        useUnifiedTopology: true,
       });
 
       console.log("Database connection successful");

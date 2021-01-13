@@ -1,19 +1,20 @@
 const { Router } = require("express");
 const userControllers = require("./user.controllers");
-const authControllers = require("./auth/auth.controllers");
+const authMiddlewares = require("../middlewares/authMiddlewares");
+const userMiddlewares = require("../middlewares/userMiddlewares");
 
 const userRouter = new Router();
 
 userRouter.get(
   "/current",
-  authControllers.isAuthorized,
+  authMiddlewares.isAuthorized,
   userControllers.currentUser
 );
 
 userRouter.patch(
   "/",
-  authControllers.isAuthorized,
-  userControllers.validateUpdateUser,
+  authMiddlewares.isAuthorized,
+  userMiddlewares.validateUpdateUser,
   userControllers.updateUser
 );
 

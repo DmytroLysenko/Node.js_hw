@@ -1,23 +1,24 @@
 const { Router } = require("express");
 const authControllers = require("./auth.controllers");
+const authMiddlewares = require("../middlewares/authMiddlewares");
 
 const authRouter = Router();
 
 authRouter.post(
   "/register",
-  authControllers.validateAuthData,
+  authMiddlewares.validateAuthData,
   authControllers.registerUser
 );
 
 authRouter.post(
   "/login",
-  authControllers.validateAuthData,
+  authMiddlewares.validateAuthData,
   authControllers.loginUser
 );
 
 authRouter.post(
   "/logout",
-  authControllers.isAuthorized,
+  authMiddlewares.isAuthorized,
   authControllers.logoutUser
 );
 
