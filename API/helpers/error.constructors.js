@@ -27,3 +27,13 @@ exports.LoginOccupied = class LoginOccupied extends (
     this.stack = null;
   }
 };
+
+exports.NotFound = class NotFound extends (
+  Error
+) {
+  constructor(message) {
+    super(message);
+    this.status = 404;
+    this.stack = null;
+  }
+};

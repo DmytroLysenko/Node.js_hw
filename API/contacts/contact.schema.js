@@ -1,21 +1,23 @@
-const { Schema } = require("mongoose");
-const mongoosePaginate = require("mongoose-paginate-v2");
+const {
+  Schema,
+  SchemaTypes: { ObjectId },
+} = require("mongoose");
 
 module.exports = new Schema({
   name: {
     type: String,
+    min: 3,
     required: true,
   },
   email: {
     type: String,
     required: true,
     validate: validateEmail,
-    unique: true,
   },
   phone: {
     type: String,
+    required: true,
     validate: validatePhone,
-    default: null,
   },
   subscription: {
     type: String,
@@ -24,13 +26,14 @@ module.exports = new Schema({
   },
   password: {
     type: String,
-    required: true,
+    default: null,
   },
   token: {
     type: String,
-    default: "",
+    default: null,
   },
-}).plugin(mongoosePaginate);
+  userId: { type: ObjectId, required: true },
+});
 
 function validateEmail(email) {
   const isValid = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/.test(

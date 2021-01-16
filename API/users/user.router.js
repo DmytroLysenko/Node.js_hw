@@ -11,6 +11,12 @@ userRouter.get(
   userControllers.currentUser
 );
 
+userRouter.get(
+  "/current/with-contacts",
+  authMiddlewares.isAuthorized,
+  userControllers.currentUserWithContacts
+);
+
 userRouter.patch(
   "/",
   authMiddlewares.isAuthorized,
