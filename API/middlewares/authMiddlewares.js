@@ -12,14 +12,20 @@ async function isAuthorized(req, res, next) {
     const [type, token] = authHeader.split(" ");
 
     const payload = User.getPayloadFromToken(token);
-
+    
     if (!payload) {
       throw new NotAuthorized("Not authorized");
     }
-
+    
     const user = await User.findById(payload.id);
-
+    
     if (!user) {
+      throw new NotAuthorized("Not authorized");
+    }
+
+    const isTokenEqual = user.isTokenEqual(token);
+
+    if (!isTokenEqual) {
       throw new NotAuthorized("Not authorized");
     }
 

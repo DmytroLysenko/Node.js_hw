@@ -9,8 +9,28 @@ const costFactor = Number(process.env.BCRYPT_COST_FACTOR);
 
 const userSchema = require("./user.schema");
 
-userSchema.methods.makeToken = function makeToken(payload) {
-  return jwt.sign({ ...payload }, JWT_SECRET);
+userSchema.methods.makeToken = function makeToken() {
+  return jwt.sign({ id: this._id }, JWT_SECRET);
+};
+
+userSchema.methods.generateAndSaveToken = async function generateAndSaveToken() {
+  try {
+    this.token = this.makeToken();
+    await this.save();
+    return this;
+  } catch (err) {
+    throw err;
+  }
+};
+
+userSchema.methods.deleteToken = async function deleteToken() {
+  try {
+    this.token = null;
+    await this.save();
+    return this;
+  } catch (err) {
+    throw err;
+  }
 };
 
 userSchema.statics.getPayloadFromToken = function getPayloadFromToken(token) {
@@ -22,7 +42,11 @@ userSchema.statics.getPayloadFromToken = function getPayloadFromToken(token) {
   }
 };
 
-userSchema.statics.makeHashPassword = async function makeHashPassword(
+userSchema.methods.isTokenEqual = function isTokenEqual(token) {
+  return token === this.token ? true : false;
+};
+
+userSchema.statics.makePasswordHash = async function makePasswordHash(
   password
 ) {
   try {
@@ -33,14 +57,21 @@ userSchema.statics.makeHashPassword = async function makeHashPassword(
   }
 };
 
-userSchema.methods.isPasswordInvalid = async function isPasswordInvalid(
-  password,
-  passwordHash
-) {
+userSchema.methods.isPasswordValid = async function isPasswordValid(password) {
   try {
-    const result = await bcrypt.compare(password, passwordHash);
-    return result ? false : true;
+    const result = await bcrypt.compare(password, this.password);
+    return result ? true : false;
   } catch (error) {
+    throw err;
+  }
+};
+
+userSchema.methods.updateUserSub = async function updateUserSub(subscription) {
+  try {
+    this.subscription = subscription;
+    await this.save();
+    return this;
+  } catch (err) {
     throw err;
   }
 };
@@ -74,7 +105,7 @@ userSchema.methods.getContacts = async function getContacts({
 
 userSchema.methods.getContactById = async function getContactById(contactId) {
   try {
-    const contact = await Contact.find({ userId: this._id, _id: contactId });
+    const [contact] = await Contact.find({ userId: this._id, _id: contactId });
     return contact;
   } catch (err) {
     throw err;
@@ -83,16 +114,13 @@ userSchema.methods.getContactById = async function getContactById(contactId) {
 
 userSchema.methods.isContactExist = async function isContactExist(contactData) {
   try {
-    const { name, email, phone } = contactData;
+    const { email, phone } = contactData;
     const contacts = await this.getContacts();
 
-    const result = contacts.filter(
-      (contact) =>
-        contact.name === name &&
-        contact.email === email &&
-        contact.phone === phone
+    const contact = contacts.find(
+      (contact) => contact.email === email && contact.phone === phone
     );
-    return result.length !== 0 ? true : false;
+    return contact ? true : false;
   } catch (err) {
     throw err;
   }

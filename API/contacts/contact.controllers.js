@@ -8,7 +8,9 @@ const createContact = async (req, res, next) => {
     const user = req.user;
     const contactData = req.body;
 
-    if (await user.isContactExist(contactData)) {
+    const isContactExist = await user.isContactExist(contactData);
+
+    if (isContactExist) {
       throw new BadRequest("Contact with same data is already exists");
     }
 
@@ -26,7 +28,9 @@ const updateContact = async (req, res, next) => {
     const contactData = req.body;
     const user = req.user;
 
-    if (await user.isContactExist(contactData)) {
+    const isContactExist = await user.isContactExist(contactData);
+
+    if (isContactExist) {
       throw new BadRequest("Contact with same data is already exists");
     }
 
@@ -55,7 +59,7 @@ const getContacts = async (req, res, next) => {
 
     const skip = page ? (page - 1) * limit : null;
 
-    const result = await req.user.getContacts({skip, limit});
+    const result = await req.user.getContacts({ skip, limit });
     res.status(200).json(result);
   } catch (err) {
     next(err);
@@ -66,7 +70,7 @@ const getContactById = async (req, res, next) => {
   try {
     const contactId = ObjectId(req.params.id);
 
-    const [contact] = await req.user.getContactById(contactId);
+    const contact = await req.user.getContactById(contactId);
 
     if (!contact) {
       throw new NotFound(`No contact with ID: ${req.params.id}`);

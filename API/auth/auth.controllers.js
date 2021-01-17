@@ -11,21 +11,21 @@ async function registerUser(req, res, next) {
       throw new LoginOccupied("Email in use");
     }
 
-    const passwordHash = await User.makeHashPassword(req.body.password);
+    const passwordHash = await User.makePasswordHash(req.body.password);
 
     const newUser = await User.create({
       ...req.body,
       password: passwordHash,
     });
 
-    const responseData = {
+    const response = {
       user: {
         email: newUser.email,
         subscription: newUser.subscription,
       },
     };
 
-    return res.status(201).json(responseData);
+    return res.status(201).json(response);
   } catch (err) {
     next(err);
   }
@@ -34,38 +34,29 @@ async function registerUser(req, res, next) {
 async function loginUser(req, res, next) {
   try {
     const { email, password } = req.body;
-
     const user = await User.findOne({ email });
 
     if (!user) {
       throw new NotAuthorized("Email or password is wrong");
     }
 
-    if (await user.isPasswordInvalid(password, user.password)) {
+    const isPasswordValid = await user.isPasswordValid(password);
+
+    if (!isPasswordValid) {
       throw new NotAuthorized("Email or password is wrong");
     }
 
-    const loggingUser = await User.findByIdAndUpdate(
-      user.id,
-      {
-        $set: {
-          token: user.makeToken({ id: user.id }),
-        },
-      },
-      {
-        new: true,
-      }
-    );
+    const loggedUser = await user.generateAndSaveToken();
 
-    const responseData = {
-      token: loggingUser.token,
+    const response = {
+      token: loggedUser.token,
       user: {
-        email: loggingUser.email,
-        subscription: loggingUser.subscription,
+        email: loggedUser.email,
+        subscription: loggedUser.subscription,
       },
     };
 
-    res.status(200).json(responseData);
+    res.status(200).json(response);
   } catch (err) {
     next(err);
   }
@@ -73,21 +64,8 @@ async function loginUser(req, res, next) {
 
 async function logoutUser(req, res, next) {
   try {
-    const { id } = req.user;
-    const user = await User.findByIdAndUpdate(
-      id,
-      {
-        $set: {
-          token: null,
-        },
-      },
-      {
-        new: true,
-      }
-    );
-    if (!user) {
-      throw new NotAuthorized("Not authorized");
-    }
+    const user = req.user;
+    await user.deleteToken();
     res.status(204).send();
   } catch (err) {
     next(err);

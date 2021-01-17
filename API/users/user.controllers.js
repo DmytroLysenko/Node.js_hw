@@ -29,21 +29,15 @@ async function currentUserWithContacts(req, res, next) {
 
 async function updateUser(req, res, next) {
   try {
+    const user = req.user;
     const { subscription } = req.body;
+
     if (subscription === req.user.subscription) {
       return res.status(200).send();
     }
 
-    const { id } = req.user;
-    const updatedUser = await User.findByIdAndUpdate(
-      id,
-      {
-        $set: {
-          subscription,
-        },
-      },
-      { new: true }
-    );
+    await user.updateUserSub(subscription);
+
     return res.status(200).send();
   } catch (err) {
     next(err);
