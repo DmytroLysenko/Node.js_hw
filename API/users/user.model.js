@@ -9,13 +9,13 @@ const costFactor = Number(process.env.BCRYPT_COST_FACTOR);
 
 const userSchema = require("./user.schema");
 
-userSchema.methods.makeToken = function makeToken() {
+function makeToken() {
   return jwt.sign({ id: this._id }, JWT_SECRET);
-};
+}
 
 userSchema.methods.generateAndSaveToken = async function generateAndSaveToken() {
   try {
-    this.token = this.makeToken();
+    this.token = makeToken.bind(this)();
     await this.save();
     return this;
   } catch (err) {
@@ -76,28 +76,21 @@ userSchema.methods.updateUserSub = async function updateUserSub(subscription) {
   }
 };
 
-userSchema.methods.getContacts = async function getContacts({
-  skip,
-  limit,
-} = {}) {
+userSchema.methods.getContacts = async function getContacts() {
   try {
-    if (!limit) {
-      const contacts = await Contact.find({ userId: this._id });
-      return contacts;
-    }
-    const contacts = await Contact.find({ userId: this._id })
-      .skip(skip)
-      .limit(limit);
-    const contactsCount = await Contact.find({ userId: this._id }).count();
-    const result = {
-      contacts,
-      skip,
-      limit,
-      contactsCount,
-      page: skip / limit + 1,
-      totalPage: Math.ceil(contactsCount / limit),
-    };
-    return result;
+    const contacts = await Contact.find({ userId: this._id });
+    return contacts;
+  } catch (err) {
+    throw err;
+  }
+};
+
+userSchema.methods.getContactsWithPagination = async function getContactsWithPagination(
+  options
+) {
+  try {
+    const contacts = await Contact.paginate({ userId: this._id }, options);
+    return contacts;
   } catch (err) {
     throw err;
   }

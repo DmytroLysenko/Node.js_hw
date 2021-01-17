@@ -2,7 +2,6 @@ const User = require("./user.model");
 
 function currentUser(req, res, next) {
   const user = {
-    _id: req.user._id,
     email: req.user.email,
     subscription: req.user.subscription,
   };
@@ -11,11 +10,10 @@ function currentUser(req, res, next) {
 
 async function currentUserWithContacts(req, res, next) {
   try {
-    const { _id, email, subscription } = req.user;
+    const { email, subscription } = req.user;
     const contacts = await req.user.getContacts();
 
     const responseData = {
-      _id,
       email,
       subscription,
       contacts,

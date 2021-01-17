@@ -46,21 +46,18 @@ const updateContact = async (req, res, next) => {
 
 const getContacts = async (req, res, next) => {
   try {
-    const page = req.query.page
-      ? parseInt(req.query.page) > 0
-        ? parseInt(req.query.page)
-        : 1
-      : null;
-    const limit = page
-      ? parseInt(req.query.limit) > 0
-        ? parseInt(req.query.limit)
-        : 10
-      : null;
+    if (!req.query.page) {
+      const contacts = await req.user.getContacts();
+      res.status(200).json(contacts);
+    }
 
-    const skip = page ? (page - 1) * limit : null;
+    const options = {
+      ...req.query,
+    };
 
-    const result = await req.user.getContacts({ skip, limit });
-    res.status(200).json(result);
+    const contacts = await req.user.getContactsWithPagination(options);
+
+    res.status(200).json(contacts);
   } catch (err) {
     next(err);
   }
