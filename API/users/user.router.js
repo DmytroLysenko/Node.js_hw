@@ -1,4 +1,5 @@
 const { Router } = require("express");
+const upload = require("../middlewares/multer");
 const userControllers = require("./user.controllers");
 const authMiddlewares = require("../middlewares/authMiddlewares");
 const userMiddlewares = require("../middlewares/userMiddlewares");
@@ -20,8 +21,17 @@ userRouter.get(
 userRouter.patch(
   "/",
   authMiddlewares.isAuthorized,
-  userMiddlewares.validateUpdateUser,
-  userControllers.updateUser
+  userMiddlewares.validateUpdateUserSub,
+  userControllers.updateUserSub
+);
+
+userRouter.patch(
+  "/avatar",
+  authMiddlewares.isAuthorized,
+  upload.single("avatar"),
+  authMiddlewares.validateAvatar,
+  authMiddlewares.minimizeAndSaveAvatar,
+  userControllers.updateUserAvatar
 );
 
 module.exports = userRouter;

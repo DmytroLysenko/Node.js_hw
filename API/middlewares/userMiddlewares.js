@@ -1,7 +1,7 @@
 const Joi = require("joi");
 const { BadRequest } = require("../helpers/error.constructors");
 
-function validateUpdateUser(req, res, next) {
+function validateUpdateUserSub(req, res, next) {
   const validateSchema = Joi.object({
     subscription: Joi.string().valid("free", "pro", "premium").required(),
   });
@@ -16,5 +16,5 @@ function validateUpdateUser(req, res, next) {
 }
 
 module.exports = {
-  validateUpdateUser,
+  validateUpdateUserSub,
 };

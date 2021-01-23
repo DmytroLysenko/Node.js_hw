@@ -1,11 +1,14 @@
 const mongoose = require("mongoose");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
+const fsPromises = require("fs").promises;
+const path = require("path");
 const Contact = require("../contacts/contact.model");
 
 require("dotenv").config();
 const JWT_SECRET = process.env.JWT_SECRET;
 const costFactor = Number(process.env.BCRYPT_COST_FACTOR);
+const IMAGES_BUCKET = process.env.IMAGES_BUCKET;
 
 const userSchema = require("./user.schema");
 
@@ -154,6 +157,34 @@ userSchema.methods.updateContact = async function updateContact(
       { new: true }
     );
     return contact;
+  } catch (err) {
+    throw err;
+  }
+};
+
+userSchema.statics.generateAvatarLink = function generateAvatarLink(file) {
+  if (!file) {
+    return `${IMAGES_BUCKET}/defaultAvatar.png`;
+  }
+  return `${IMAGES_BUCKET}/${file.filename}`;
+};
+
+userSchema.methods.updateUserAvatar = async function updateUserAvatar(file) {
+  try {
+    if (this.avatarFilename !== "defaultAvatar.png") {
+      await fsPromises.unlink(
+        path.join(__dirname, "../../static/images", this.avatarFilename)
+      );
+    }
+    if (!file) {
+      this.avatarURL = `${IMAGES_BUCKET}/defaultAvatar.png`;
+      this.avatarFilename = "defaultAvatar.png";
+    } else {
+      this.avatarURL = `${IMAGES_BUCKET}/${file.filename}`;
+      this.avatarFilename = file.filename;
+    }
+    this.save();
+    return this;
   } catch (err) {
     throw err;
   }

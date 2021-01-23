@@ -6,6 +6,7 @@ const mongoose = require("mongoose");
 const contactsRouter = require("./contacts/contact.router");
 const userRouter = require("./users/user.router");
 const authRouter = require("./auth/auth.router");
+const publicRouter = require("./public/public.router");
 
 class Server {
   /**
@@ -41,6 +42,7 @@ class Server {
     this.app.use("/api/contacts", contactsRouter);
     this.app.use("/api/auth", authRouter);
     this.app.use("/api/users", userRouter);
+    this.app.use("/", publicRouter);
   }
 
   async connectToDB() {

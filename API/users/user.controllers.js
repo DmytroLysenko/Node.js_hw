@@ -1,21 +1,21 @@
-const User = require("./user.model");
-
 function currentUser(req, res, next) {
   const user = {
     email: req.user.email,
     subscription: req.user.subscription,
+    avatarURL: req.user.avatarURL,
   };
   res.status(200).json(user);
 }
 
 async function currentUserWithContacts(req, res, next) {
   try {
-    const { email, subscription } = req.user;
+    const { email, subscription, avatarURL } = req.user;
     const contacts = await req.user.getContacts();
 
     const responseData = {
       email,
       subscription,
+      avatarURL,
       contacts,
     };
 
@@ -25,7 +25,7 @@ async function currentUserWithContacts(req, res, next) {
   }
 }
 
-async function updateUser(req, res, next) {
+async function updateUserSub(req, res, next) {
   try {
     const user = req.user;
     const { subscription } = req.body;
@@ -42,8 +42,21 @@ async function updateUser(req, res, next) {
   }
 }
 
+async function updateUserAvatar(req, res, next) {
+  try {
+    const { user, file } = req;
+
+    const updatedUser = await user.updateUserAvatar(file);
+
+    return res.status(200).json({ avatarURL: updatedUser.avatarURL });
+  } catch (err) {
+    next(err);
+  }
+}
+
 module.exports = {
   currentUser,
   currentUserWithContacts,
-  updateUser,
+  updateUserSub,
+  updateUserAvatar,
 };

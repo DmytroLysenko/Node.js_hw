@@ -48,7 +48,7 @@ const getContacts = async (req, res, next) => {
   try {
     if (!req.query.page) {
       const contacts = await req.user.getContacts();
-      res.status(200).json(contacts);
+      return res.status(200).json(contacts);
     }
 
     const options = {

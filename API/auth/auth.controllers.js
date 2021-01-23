@@ -1,3 +1,4 @@
+const fsPromises = require("fs").promises;
 const User = require("../users/user.model");
 const {
   NotAuthorized,
@@ -8,6 +9,9 @@ async function registerUser(req, res, next) {
   try {
     const user = await User.findOne({ email: req.body.email });
     if (user) {
+      if (req.file) {
+        await fsPromises.unlink(req.file.path);
+      }
       throw new LoginOccupied("Email in use");
     }
 
@@ -16,12 +20,15 @@ async function registerUser(req, res, next) {
     const newUser = await User.create({
       ...req.body,
       password: passwordHash,
+      avatarURL: await User.generateAvatarLink(req.file),
+      avatarFilename: req.file ? req.file.filename : "defaultAvatar.png",
     });
 
     const response = {
       user: {
         email: newUser.email,
         subscription: newUser.subscription,
+        avatarURL: newUser.avatarURL,
       },
     };
 

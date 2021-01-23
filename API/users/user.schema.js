@@ -20,6 +20,11 @@ module.exports = new Schema({
     type: String,
     default: null,
   },
+  avatarURL: {
+    type: String,
+    default: "http://localhost:3000/images/defaultAvatar.jpg",
+  },
+  avatarFilename: { type: String, required: true },
 });
 
 function validateEmail(email) {
