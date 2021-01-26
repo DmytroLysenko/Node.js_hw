@@ -2,6 +2,7 @@ const { Router } = require("express");
 const authControllers = require("./auth.controllers");
 const authMiddlewares = require("../middlewares/authMiddlewares");
 const upload = require("../middlewares/multer");
+const minimizeAndSaveAvatar = require("../middlewares/imageminMiddlewares")
 
 const authRouter = Router();
 
@@ -10,7 +11,7 @@ authRouter.post(
   upload.single("avatar"),
   authMiddlewares.validateAuthData,
   authMiddlewares.validateAvatar,
-  authMiddlewares.minimizeAndSaveAvatar,
+  minimizeAndSaveAvatar,
   authControllers.registerUser
 );
 

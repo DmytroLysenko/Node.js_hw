@@ -3,6 +3,7 @@ const upload = require("../middlewares/multer");
 const userControllers = require("./user.controllers");
 const authMiddlewares = require("../middlewares/authMiddlewares");
 const userMiddlewares = require("../middlewares/userMiddlewares");
+const minimizeAndSaveAvatar = require("../middlewares/imageminMiddlewares");
 
 const userRouter = new Router();
 
@@ -30,7 +31,7 @@ userRouter.patch(
   authMiddlewares.isAuthorized,
   upload.single("avatar"),
   authMiddlewares.validateAvatar,
-  authMiddlewares.minimizeAndSaveAvatar,
+  minimizeAndSaveAvatar,
   userControllers.updateUserAvatar
 );
 
