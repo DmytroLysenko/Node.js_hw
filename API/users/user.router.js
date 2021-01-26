@@ -26,7 +26,7 @@ userRouter.patch(
 );
 
 userRouter.patch(
-  "/avatar",
+  "/avatars",
   authMiddlewares.isAuthorized,
   upload.single("avatar"),
   authMiddlewares.validateAvatar,

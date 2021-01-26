@@ -9,6 +9,7 @@ require("dotenv").config();
 const JWT_SECRET = process.env.JWT_SECRET;
 const costFactor = Number(process.env.BCRYPT_COST_FACTOR);
 const IMAGES_BUCKET = process.env.IMAGES_BUCKET;
+const DEFAULT_AVATAR_FILENAME = process.env.DEFAULT_AVATAR_FILENAME;
 
 const userSchema = require("./user.schema");
 
@@ -162,28 +163,25 @@ userSchema.methods.updateContact = async function updateContact(
   }
 };
 
-userSchema.statics.generateAvatarLink = function generateAvatarLink(file) {
-  if (!file) {
-    return `${IMAGES_BUCKET}/defaultAvatar.png`;
-  }
-  return `${IMAGES_BUCKET}/${file.filename}`;
-};
-
-userSchema.methods.updateUserAvatar = async function updateUserAvatar(file) {
+userSchema.methods.updateUserAvatar = async function updateUserAvatar(
+  filename
+) {
   try {
-    if (this.avatarFilename !== "defaultAvatar.png") {
+    const isPassed =
+      this.avatarFilename && this.avatarFilename !== DEFAULT_AVATAR_FILENAME;
+
+    if (isPassed) {
       await fsPromises.unlink(
         path.join(__dirname, "../../static/images", this.avatarFilename)
       );
     }
-    if (!file) {
-      this.avatarURL = `${IMAGES_BUCKET}/defaultAvatar.png`;
-      this.avatarFilename = "defaultAvatar.png";
-    } else {
-      this.avatarURL = `${IMAGES_BUCKET}/${file.filename}`;
-      this.avatarFilename = file.filename;
-    }
-    this.save();
+
+    this.overwrite({
+      ...this._doc,
+      avatarURL: `${IMAGES_BUCKET}/${filename}`,
+      avatarFilename: filename,
+    });
+    await this.save();
     return this;
   } catch (err) {
     throw err;

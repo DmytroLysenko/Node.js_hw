@@ -126,7 +126,7 @@ async function minimizeAndSaveAvatar(req, res, next) {
 
     next();
   } catch (err) {
-    throw err;
+    next(err);
   }
 }
 

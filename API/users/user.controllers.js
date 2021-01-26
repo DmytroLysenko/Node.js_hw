@@ -1,25 +1,37 @@
+require("dotenv").config();
+const IMAGES_BUCKET = process.env.IMAGES_BUCKET;
+const DEFAULT_AVATAR_FILENAME = process.env.DEFAULT_AVATAR_FILENAME;
+
 function currentUser(req, res, next) {
-  const user = {
+  const avatarURL = req.user.avatarURL
+    ? req.user.avatarURL
+    : `${IMAGES_BUCKET}/${DEFAULT_AVATAR_FILENAME}`;
+
+  const response = {
     email: req.user.email,
     subscription: req.user.subscription,
-    avatarURL: req.user.avatarURL,
+    avatarURL,
   };
-  res.status(200).json(user);
+  res.status(200).json(response);
 }
 
 async function currentUserWithContacts(req, res, next) {
   try {
-    const { email, subscription, avatarURL } = req.user;
+    const { email, subscription } = req.user;
     const contacts = await req.user.getContacts();
 
-    const responseData = {
+    const avatarURL = req.user.avatarURL
+      ? req.user.avatarURL
+      : `${IMAGES_BUCKET}/${DEFAULT_AVATAR_FILENAME}`;
+
+    const response = {
       email,
       subscription,
       avatarURL,
       contacts,
     };
 
-    res.status(200).json(responseData);
+    res.status(200).json(response);
   } catch (err) {
     next(err);
   }
@@ -45,8 +57,9 @@ async function updateUserSub(req, res, next) {
 async function updateUserAvatar(req, res, next) {
   try {
     const { user, file } = req;
+    const filename = file ? file.filename : DEFAULT_AVATAR_FILENAME;
 
-    const updatedUser = await user.updateUserAvatar(file);
+    const updatedUser = await user.updateUserAvatar(filename);
 
     return res.status(200).json({ avatarURL: updatedUser.avatarURL });
   } catch (err) {

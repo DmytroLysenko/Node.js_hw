@@ -1,4 +1,8 @@
 const { Schema } = require("mongoose");
+require("dotenv").config();
+
+const IMAGES_BUCKET = process.env.IMAGES_BUCKET;
+const DEFAULT_AVATAR_FILENAME = process.env.DEFAULT_AVATAR_FILENAME;
 
 module.exports = new Schema({
   email: {
@@ -22,9 +26,12 @@ module.exports = new Schema({
   },
   avatarURL: {
     type: String,
-    default: "http://localhost:3000/images/defaultAvatar.jpg",
+    default: `${IMAGES_BUCKET}/${DEFAULT_AVATAR_FILENAME}`,
   },
-  avatarFilename: { type: String, required: true },
+  avatarFilename: {
+    type: String,
+    default: DEFAULT_AVATAR_FILENAME,
+  },
 });
 
 function validateEmail(email) {

@@ -4,6 +4,10 @@ const {
   NotAuthorized,
   LoginOccupied,
 } = require("../helpers/error.constructors");
+require("dotenv").config();
+
+const IMAGES_BUCKET = process.env.IMAGES_BUCKET;
+const DEFAULT_AVATAR_FILENAME = process.env.DEFAULT_AVATAR_FILENAME;
 
 async function registerUser(req, res, next) {
   try {
@@ -17,11 +21,19 @@ async function registerUser(req, res, next) {
 
     const passwordHash = await User.makePasswordHash(req.body.password);
 
+    const avatarOptions = req.file
+      ? {
+          avatarURL: `${IMAGES_BUCKET}/${req.file.filename}`,
+          avatarFilename: req.file.filename,
+        }
+      : {};
+
+    console.log(avatarOptions);
+
     const newUser = await User.create({
       ...req.body,
       password: passwordHash,
-      avatarURL: await User.generateAvatarLink(req.file),
-      avatarFilename: req.file ? req.file.filename : "defaultAvatar.png",
+      ...avatarOptions,
     });
 
     const response = {
@@ -55,11 +67,16 @@ async function loginUser(req, res, next) {
 
     const loggedUser = await user.generateAndSaveToken();
 
+    const avatarURL = loggedUser.avatarURL
+      ? loggedUser.avatarURL
+      : `${IMAGES_BUCKET}/${DEFAULT_AVATAR_FILENAME}`;
+
     const response = {
       token: loggedUser.token,
       user: {
         email: loggedUser.email,
         subscription: loggedUser.subscription,
+        avatarURL,
       },
     };
 
