@@ -1,5 +1,5 @@
 const Joi = require("joi");
-const path = require("path");
+const fsPromises = require("fs").promises;
 
 const User = require("../users/user.model");
 const { NotAuthorized, BadRequest } = require("../helpers/error.constructors");
@@ -70,32 +70,7 @@ async function validateAuthData(req, res, next) {
   }
 }
 
-async function validateAvatar(req, res, next) {
-  try {
-    if (!req.file) {
-      return next();
-    }
-
-    const ext = path.extname(req.file.originalname);
-    const size = req.file.size;
-
-    if (ext !== ".jpg" && ext !== ".png") {
-      await fsPromises.unlink(req.file.path);
-      throw new BadRequest('File extension must be "jpg" or "png"');
-    }
-    if (size > 8e7) {
-      await fsPromises.unlink(req.file.path);
-      throw new BadRequest("File size must be less than 10M");
-    }
-
-    next();
-  } catch (err) {
-    next(err);
-  }
-}
-
 module.exports = {
   isAuthorized,
   validateAuthData,
-  validateAvatar,
 };

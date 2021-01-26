@@ -1,11 +1,10 @@
-require("dotenv").config();
-const IMAGES_BUCKET = process.env.IMAGES_BUCKET;
+const IMAGES_SOURCE = process.env.IMAGES_SOURCE;
 const DEFAULT_AVATAR_FILENAME = process.env.DEFAULT_AVATAR_FILENAME;
 
 function currentUser(req, res, next) {
   const avatarURL = req.user.avatarURL
     ? req.user.avatarURL
-    : `${IMAGES_BUCKET}/${DEFAULT_AVATAR_FILENAME}`;
+    : `${IMAGES_SOURCE}/${DEFAULT_AVATAR_FILENAME}`;
 
   const response = {
     email: req.user.email,
@@ -22,7 +21,7 @@ async function currentUserWithContacts(req, res, next) {
 
     const avatarURL = req.user.avatarURL
       ? req.user.avatarURL
-      : `${IMAGES_BUCKET}/${DEFAULT_AVATAR_FILENAME}`;
+      : `${IMAGES_SOURCE}/${DEFAULT_AVATAR_FILENAME}`;
 
     const response = {
       email,

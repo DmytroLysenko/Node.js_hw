@@ -1,7 +1,6 @@
 const { Schema } = require("mongoose");
-require("dotenv").config();
 
-const IMAGES_BUCKET = process.env.IMAGES_BUCKET;
+const IMAGES_SOURCE = process.env.IMAGES_SOURCE;
 const DEFAULT_AVATAR_FILENAME = process.env.DEFAULT_AVATAR_FILENAME;
 
 module.exports = new Schema({
@@ -26,7 +25,7 @@ module.exports = new Schema({
   },
   avatarURL: {
     type: String,
-    default: `${IMAGES_BUCKET}/${DEFAULT_AVATAR_FILENAME}`,
+    default: `${IMAGES_SOURCE}/${DEFAULT_AVATAR_FILENAME}`,
   },
   avatarFilename: {
     type: String,

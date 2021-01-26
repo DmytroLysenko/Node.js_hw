@@ -5,10 +5,9 @@ const fsPromises = require("fs").promises;
 const path = require("path");
 const Contact = require("../contacts/contact.model");
 
-require("dotenv").config();
 const JWT_SECRET = process.env.JWT_SECRET;
 const costFactor = Number(process.env.BCRYPT_COST_FACTOR);
-const IMAGES_BUCKET = process.env.IMAGES_BUCKET;
+const IMAGES_SOURCE = process.env.IMAGES_SOURCE;
 const DEFAULT_AVATAR_FILENAME = process.env.DEFAULT_AVATAR_FILENAME;
 
 const userSchema = require("./user.schema");
@@ -176,11 +175,10 @@ userSchema.methods.updateUserAvatar = async function updateUserAvatar(
       );
     }
 
-    this.overwrite({
-      ...this._doc,
-      avatarURL: `${IMAGES_BUCKET}/${filename}`,
-      avatarFilename: filename,
-    });
+    console.log(IMAGES_SOURCE)
+    this.avatarURL = `${IMAGES_SOURCE}/${filename}`,
+    this.avatarFilename = filename,
+
     await this.save();
     return this;
   } catch (err) {
