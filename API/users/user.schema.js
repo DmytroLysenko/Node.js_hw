@@ -1,5 +1,8 @@
 const { Schema } = require("mongoose");
 
+const IMAGES_SOURCE = process.env.IMAGES_SOURCE;
+const DEFAULT_AVATAR_FILENAME = process.env.DEFAULT_AVATAR_FILENAME;
+
 module.exports = new Schema({
   email: {
     type: String,
@@ -19,6 +22,14 @@ module.exports = new Schema({
   token: {
     type: String,
     default: null,
+  },
+  avatarURL: {
+    type: String,
+    default: `${IMAGES_SOURCE}/${DEFAULT_AVATAR_FILENAME}`,
+  },
+  avatarFilename: {
+    type: String,
+    default: DEFAULT_AVATAR_FILENAME,
   },
 });
 
