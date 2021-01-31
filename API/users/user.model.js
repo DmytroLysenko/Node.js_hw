@@ -16,7 +16,29 @@ function makeToken() {
   return jwt.sign({ id: this._id }, JWT_SECRET);
 }
 
-userSchema.methods.generateAndSaveToken = async function generateAndSaveToken() {
+userSchema.statics.makePasswordHash = makePasswordHash;
+userSchema.statics.getPayloadFromToken = getPayloadFromToken;
+userSchema.statics.getUserByVerificationToken = getUserByVerificationToken;
+userSchema.statics.getUserByEmail = getUserByEmail;
+
+userSchema.methods.generateAndSaveToken = generateAndSaveToken;
+userSchema.methods.deleteToken = deleteToken;
+userSchema.methods.isTokenEqual = isTokenEqual;
+userSchema.methods.isPasswordValid = isPasswordValid;
+
+userSchema.methods.updateUserSub = updateUserSub;
+userSchema.methods.updateUserAvatar = updateUserAvatar;
+userSchema.methods.updateVerificationToken = updateVerificationToken;
+
+userSchema.methods.getContactsWithPagination = getContactsWithPagination;
+userSchema.methods.getContacts = getContacts;
+userSchema.methods.getContactById = getContactById;
+userSchema.methods.isContactExist = isContactExist;
+userSchema.methods.addContact = addContact;
+userSchema.methods.deleteContact = deleteContact;
+userSchema.methods.updateContact = updateContact;
+
+async function generateAndSaveToken() {
   try {
     this.token = makeToken.bind(this)();
     await this.save();
@@ -24,9 +46,9 @@ userSchema.methods.generateAndSaveToken = async function generateAndSaveToken() 
   } catch (err) {
     throw err;
   }
-};
+}
 
-userSchema.methods.deleteToken = async function deleteToken() {
+async function deleteToken() {
   try {
     this.token = null;
     await this.save();
@@ -34,42 +56,40 @@ userSchema.methods.deleteToken = async function deleteToken() {
   } catch (err) {
     throw err;
   }
-};
+}
 
-userSchema.statics.getPayloadFromToken = function getPayloadFromToken(token) {
+function getPayloadFromToken(token) {
   try {
     const payload = jwt.verify(token, JWT_SECRET);
     return payload;
   } catch {
     return false;
   }
-};
+}
 
-userSchema.methods.isTokenEqual = function isTokenEqual(token) {
+function isTokenEqual(token) {
   return token === this.token ? true : false;
-};
+}
 
-userSchema.statics.makePasswordHash = async function makePasswordHash(
-  password
-) {
+async function makePasswordHash(password) {
   try {
     const passwordHash = await bcrypt.hash(password, costFactor);
     return passwordHash;
   } catch (error) {
     throw error;
   }
-};
+}
 
-userSchema.methods.isPasswordValid = async function isPasswordValid(password) {
+async function isPasswordValid(password) {
   try {
     const result = await bcrypt.compare(password, this.password);
     return result ? true : false;
   } catch (error) {
     throw err;
   }
-};
+}
 
-userSchema.methods.updateUserSub = async function updateUserSub(subscription) {
+async function updateUserSub(subscription) {
   try {
     this.subscription = subscription;
     await this.save();
@@ -77,38 +97,36 @@ userSchema.methods.updateUserSub = async function updateUserSub(subscription) {
   } catch (err) {
     throw err;
   }
-};
+}
 
-userSchema.methods.getContacts = async function getContacts() {
+async function getContacts() {
   try {
     const contacts = await Contact.find({ userId: this._id });
     return contacts;
   } catch (err) {
     throw err;
   }
-};
+}
 
-userSchema.methods.getContactsWithPagination = async function getContactsWithPagination(
-  options
-) {
+async function getContactsWithPagination(options) {
   try {
     const contacts = await Contact.paginate({ userId: this._id }, options);
     return contacts;
   } catch (err) {
     throw err;
   }
-};
+}
 
-userSchema.methods.getContactById = async function getContactById(contactId) {
+async function getContactById(contactId) {
   try {
-    const [contact] = await Contact.find({ userId: this._id, _id: contactId });
+    const contact = await Contact.findOne({ userId: this._id, _id: contactId });
     return contact;
   } catch (err) {
     throw err;
   }
-};
+}
 
-userSchema.methods.isContactExist = async function isContactExist(contactData) {
+async function isContactExist(contactData) {
   try {
     const { email, phone } = contactData;
     const contacts = await this.getContacts();
@@ -120,9 +138,9 @@ userSchema.methods.isContactExist = async function isContactExist(contactData) {
   } catch (err) {
     throw err;
   }
-};
+}
 
-userSchema.methods.addContact = async function addContact(contactData) {
+async function addContact(contactData) {
   try {
     const contact = new Contact({
       ...contactData,
@@ -133,21 +151,18 @@ userSchema.methods.addContact = async function addContact(contactData) {
   } catch (err) {
     throw err;
   }
-};
+}
 
-userSchema.methods.deleteContact = async function deleteContact(contactId) {
+async function deleteContact(contactId) {
   try {
     const contact = await Contact.findByIdAndRemove(contactId);
     return contact;
   } catch (err) {
     throw err;
   }
-};
+}
 
-userSchema.methods.updateContact = async function updateContact(
-  contactId,
-  contactData
-) {
+async function updateContact(contactId, contactData) {
   try {
     const contact = await Contact.findByIdAndUpdate(
       contactId,
@@ -160,11 +175,9 @@ userSchema.methods.updateContact = async function updateContact(
   } catch (err) {
     throw err;
   }
-};
+}
 
-userSchema.methods.updateUserAvatar = async function updateUserAvatar(
-  filename
-) {
+async function updateUserAvatar(filename) {
   try {
     const isPassed =
       this.avatarFilename && this.avatarFilename !== DEFAULT_AVATAR_FILENAME;
@@ -175,15 +188,41 @@ userSchema.methods.updateUserAvatar = async function updateUserAvatar(
       );
     }
 
-    console.log(IMAGES_SOURCE)
-    this.avatarURL = `${IMAGES_SOURCE}/${filename}`,
-    this.avatarFilename = filename,
-
-    await this.save();
+    (this.avatarURL = `${IMAGES_SOURCE}/${filename}`),
+      (this.avatarFilename = filename),
+      await this.save();
     return this;
   } catch (err) {
     throw err;
   }
-};
+}
+
+async function updateVerificationToken(value) {
+  try {
+    this.verificationToken = value;
+    await this.save();
+    return this.verificationToken;
+  } catch (err) {
+    throw err;
+  }
+}
+
+async function getUserByVerificationToken(verificationToken) {
+  try {
+    const user = await this.findOne({ verificationToken: verificationToken });
+    return user ? user : null;
+  } catch (err) {
+    throw err;
+  }
+}
+
+async function getUserByEmail(email) {
+  try {
+    const user = await this.findOne({ email });
+    return user ? user : null;
+  } catch (err) {
+    nextTick(err);
+  }
+}
 
 module.exports = mongoose.model("User", userSchema);

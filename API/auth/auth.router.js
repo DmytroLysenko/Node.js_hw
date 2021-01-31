@@ -2,7 +2,7 @@ const { Router } = require("express");
 const authControllers = require("./auth.controllers");
 const authMiddlewares = require("../middlewares/authMiddlewares");
 const upload = require("../middlewares/multer");
-const avatar = require("../middlewares/avatarMiddlewares")
+const avatar = require("../middlewares/avatarMiddlewares");
 
 const authRouter = Router();
 
@@ -20,6 +20,8 @@ authRouter.post(
   authMiddlewares.validateAuthData,
   authControllers.loginUser
 );
+
+authRouter.get("/verify/:verificationToken", authControllers.verifyUserEmail);
 
 authRouter.post(
   "/logout",
