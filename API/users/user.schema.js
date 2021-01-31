@@ -23,6 +23,10 @@ module.exports = new Schema({
     type: String,
     default: null,
   },
+  verificationToken: {
+    type: String,
+    required: false,
+  },
   avatarURL: {
     type: String,
     default: `${IMAGES_SOURCE}/${DEFAULT_AVATAR_FILENAME}`,
