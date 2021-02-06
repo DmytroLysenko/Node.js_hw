@@ -8,7 +8,7 @@ async function isAuthorized(req, res, next) {
   try {
     const authHeader = req.headers.authorization;
     if (!authHeader) {
-      throw new NotAuthorized("Not authorized");
+      throw new NotAuthorized();
     }
 
     const [type, token] = authHeader.split(" ");
@@ -16,26 +16,26 @@ async function isAuthorized(req, res, next) {
     const payload = User.getPayloadFromToken(token);
 
     if (!payload) {
-      throw new NotAuthorized("Not authorized");
+      throw new NotAuthorized();
     }
 
     const user = await User.findById(payload.id);
 
     if (!user) {
-      throw new NotAuthorized("Not authorized");
+      throw new NotAuthorized();
     }
 
     const isTokenEqual = user.isTokenEqual(token);
 
     if (!isTokenEqual) {
-      throw new NotAuthorized("Not authorized");
+      throw new NotAuthorized();
     }
 
     req.user = user;
 
     next();
   } catch {
-    next(new NotAuthorized("Not authorized"));
+    next(new NotAuthorized());
   }
 }
 

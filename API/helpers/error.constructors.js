@@ -11,7 +11,7 @@ exports.BadRequest = class BadRequest extends (
 exports.NotAuthorized = class NotAuthorized extends (
   Error
 ) {
-  constructor(message) {
+  constructor(message = "Not authorized") {
     super(message);
     this.status = 401;
     this.stack = null;
